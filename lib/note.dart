@@ -54,7 +54,9 @@ class NoteState extends State<Note> {
     print(time.toString());
 
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'channel_id', 'channel_name', 'channel_description',
+      'channel_id',
+      'channel_name',
+      'channel_description',
     );
 
     var IOSPlatformChannelSpecifics = IOSNotificationDetails();
@@ -70,7 +72,7 @@ class NoteState extends State<Note> {
         widget.note['title'],
         widget.note['text'],
         time,
-        platformChannelSpecifics, payload: 'Hello from my data');
+        platformChannelSpecifics, payload: 'Hola');
     //Ver la hora programada
     Fluttertoast.showToast(
       msg: "Scheduled at time ${time.hour} : ${time.minute} : ${time.second} ",
@@ -141,7 +143,7 @@ class NoteState extends State<Note> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            widget.noteMode == NoteMode.Adding ? 'Add note' : 'Edit note'
+            widget.noteMode == NoteMode.Adding ? 'Añadir nota' : 'Editar nota'
         ),
       ),
       body: Padding(
@@ -152,21 +154,21 @@ class NoteState extends State<Note> {
             TextField(
               controller: _titleController,
               decoration: InputDecoration(
-                  hintText: 'Note title'
+                  hintText: 'Titulo de la nota'
               ),
             ),
             Container(height: 8,),
             TextField(
               controller: _textController,
               decoration: InputDecoration(
-                  hintText: 'Note text'
+                  hintText: 'Descripcion de la nota'
               ),
             ),
             Container(height: 16.0,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _NoteButton('Save', Colors.blue, () {
+                _NoteButton('Guardar', Colors.grey, () {
                   final title = _titleController.text;
                   final text = _textController.text;
 
@@ -185,13 +187,13 @@ class NoteState extends State<Note> {
                   Navigator.pop(context);
                 }),
                 Container(height: 16.0,),
-                _NoteButton('Discard', Colors.grey, () {
+                _NoteButton('Cancelar', Colors.grey, () {
                   Navigator.pop(context);
                 }),
                 widget.noteMode == NoteMode.Editing ?
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
-                  child: _NoteButton('Delete', Colors.red, () async {
+                  child: _NoteButton('Eliminar', Colors.grey, () async {
                     await NoteProvider.deleteNote(widget.note['id']);
                     Navigator.pop(context);
                   }),
@@ -205,17 +207,13 @@ class NoteState extends State<Note> {
               children: <Widget>[
                 Icon(
                   Icons.notifications_active,
-                  color: Colors.grey,
-                  size: 24.0,
+                  color: Colors.red,
+                  size: 28.0,
                 ),
                 Text('Schedule notification', style: TextStyle(color: Colors.grey),)
               ],
             ),
-            new Divider(
-                color: Colors.black,
-                indent: 90,
-                endIndent: 90,
-                thickness: 1.0),
+            Text(""),
             Container(height: 15.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -240,12 +238,12 @@ class NoteState extends State<Note> {
                               date.millisecondsSinceEpoch)
                       );
                     }, currentTime: DateTime.now(), locale: LocaleType.es);},
-                  child: Text('Click here!',
+                  child: Text('Click aquí!',
                     style: TextStyle(color: Colors.white),
                   ),
                   height: 40,
                   minWidth: 80,
-                  color: Colors.purple,
+                  color: Colors.grey,
                 ),
               ],
             ),

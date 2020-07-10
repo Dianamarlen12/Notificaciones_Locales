@@ -34,25 +34,25 @@ class MenuLateral extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Drawer(
       child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            child: Text("OPERACIONES",
-                style: TextStyle(
-                    fontFamily: 'Carter', fontSize: 30, color: Colors.white)),
-            decoration: BoxDecoration(color: Colors.black),
-          ),
-          ListTile(
-            title: Text("RECORDATORIOS",
-              style: TextStyle(fontWeight: FontWeight.bold,
-                  fontSize: 20.0,
-                  color: Colors.black),),
-            onTap: () {
-              Navigator.push(context,
-                  new MaterialPageRoute(builder: (context) => new NoteList()
-                  ));
-            },),
-      ]),);
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              child: Text("OPERACIONES",
+                  style: TextStyle(
+                      fontFamily: 'Carter', fontSize: 30, color: Colors.white)),
+              decoration: BoxDecoration(color: Colors.black),
+            ),
+            ListTile(
+              title: Text("RECORDATORIOS",
+                style: TextStyle(fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
+                    color: Colors.black),),
+              onTap: () {
+                Navigator.push(context,
+                    new MaterialPageRoute(builder: (context) => new NoteList()
+                    ));
+              },),
+          ]),);
   }
 }
 

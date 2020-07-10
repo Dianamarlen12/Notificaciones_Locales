@@ -14,8 +14,8 @@ class NoteListState extends State<NoteList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Notes'),
-        backgroundColor: Colors.blue[800],
+        title: Text('Notas', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.black,
       ),
       body: FutureBuilder(
         future: NoteProvider.getNoteList(),
@@ -47,7 +47,7 @@ class NoteListState extends State<NoteList> {
                                     decoration: new BoxDecoration(
                                         borderRadius:
                                         new BorderRadius.circular(10.0),
-                                        color: Colors.grey[300]),
+                                        color: Colors.green[300]),
                                     child: new Column(
                                       mainAxisAlignment: MainAxisAlignment.start,
                                       children: <Widget>[
@@ -78,7 +78,7 @@ class NoteListState extends State<NoteList> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue[800],
+        backgroundColor: Colors.black,
         onPressed: () {
           Navigator.push(
               context,
