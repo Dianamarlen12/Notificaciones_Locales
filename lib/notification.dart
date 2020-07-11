@@ -1,122 +1,137 @@
 import 'package:flutter/material.dart';
-import 'note_provider.dart';
-import 'note.dart';
+import 'package:intl/intl.dart';
 
-class NoteList extends StatefulWidget {
-  @override
-  NoteListState createState() {
-    return new NoteListState();
-  }
+Future<TimeOfDay> _selectTime(BuildContext context,
+    {@required DateTime initialDate}) {
+  final now = DateTime.now();
+
+  return showTimePicker(
+    context: context,
+    initialTime: TimeOfDay(hour: initialDate.hour, minute: initialDate.minute),
+  );
 }
 
-class NoteListState extends State<NoteList> {
+Future<DateTime> _selectDateTime(BuildContext context,
+    {@required DateTime initialDate}) {
+  final now = DateTime.now();
+  final newestDate = initialDate.isAfter(now) ? initialDate : now;
+
+  return showDatePicker(
+    context: context,
+    initialDate: newestDate.add(Duration(seconds: 1)),
+    firstDate: now,
+    lastDate: DateTime(2100),
+  );
+}
+
+Dialog showDateTimeDialog(
+    BuildContext context, {
+      @required ValueChanged<DateTime> onSelectedDate,
+      @required DateTime initialDate,
+    }) {
+  final dialog = Dialog(
+    child: DateTimeDialog(
+        onSelectedDate: onSelectedDate, initialDate: initialDate),
+  );
+
+  showDialog(context: context, builder: (BuildContext context) => dialog);
+}
+
+class DateTimeDialog extends StatefulWidget {
+  final ValueChanged<DateTime> onSelectedDate;
+  final DateTime initialDate;
+
+  const DateTimeDialog({
+    @required this.onSelectedDate,
+    @required this.initialDate,
+    Key key,
+  }) : super(key: key);
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Notas', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
-      ),
-      body: FutureBuilder(
-        future: NoteProvider.getNoteList(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            final notes = snapshot.data;
-            return GridView.builder(
-              itemBuilder: (context, index) {
-                var accents = Colors.accents;
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) =>
-                                Note(NoteMode.Editing, notes[index])));
-                  },
-                  child: Container(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                          top: 15.0, bottom: 0, left: 10.0, right: 10.0),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Row(children: <Widget>[
-                              new Expanded(
-                                  child: new Container(
-                                    height: 170,
-                                    decoration: new BoxDecoration(
-                                        borderRadius:
-                                        new BorderRadius.circular(10.0),
-                                        color: Colors.green[300]),
-                                    child: new Column(
-                                      mainAxisAlignment: MainAxisAlignment.start,
-                                      children: <Widget>[
-                                        _NoteTitle(notes[index]['title']),
-                                        Container(
-                                          height: 7,
-                                        ),
-                                        _NoteText(notes[index]['text']),
-                                      ],
-                                    ),
-                                  )),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 1.0,
-                                    right: 1.0
-                                ),
-                              ),
-                            ])
-                          ]),
-                    ),
-                  ),
-                );
+  _DateTimeDialogState createState() => _DateTimeDialogState();
+}
+
+class _DateTimeDialogState extends State<DateTimeDialog> {
+  DateTime selectedDate;
+
+  @override
+  void initState() {
+    super.initState();
+
+    selectedDate = widget.initialDate;
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          'Selecciona hora y fecha',
+          style: Theme.of(context).textTheme.title,
+        ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            RaisedButton(
+              color: Colors.blueGrey,
+              child: Text(DateFormat('yyyy-MM-dd').format(selectedDate)),
+              onPressed: () async {
+                final date = await _selectDateTime(context,
+                    initialDate: selectedDate);
+                if (date == null) return;
+
+                setState(() {
+                  selectedDate = DateTime(
+                    date.year,
+                    date.month,
+                    date.day,
+                    selectedDate.hour,
+                    selectedDate.minute,
+                  );
+                });
+
+                widget.onSelectedDate(selectedDate);
               },
-              itemCount: notes.length, gridDelegate: SliverGridDelegateWithFixedCrossAxisCount( crossAxisCount: 2,),
-            );
-          }
-          return Center(child: CircularProgressIndicator());
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black,
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => Note(NoteMode.Adding, null)));
-        },
-        child: Icon(Icons.add),
-      ),
-    );
-  }
+            ),
+            const SizedBox(width: 8),
+            RaisedButton(
+              color: Colors.blueGrey,
+              child: Text(DateFormat('HH:mm').format(selectedDate)),
+              onPressed: () async {
+                final time =
+                await _selectTime(context, initialDate: selectedDate);
+                if (time == null) return;
+
+                setState(() {
+                  selectedDate = DateTime(
+                    selectedDate.year,
+                    selectedDate.month,
+                    selectedDate.day,
+                    time.hour,
+                    time.minute,
+                  );
+                });
+
+                widget.onSelectedDate(selectedDate);
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        OutlineButton(
+          child: Text('Listo!'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          highlightColor: Colors.green,
+        ),
+      ],
+    ),
+  );
 }
 
-class _NoteTitle extends StatelessWidget {
-  final String _title;
 
-  _NoteTitle(this._title);
 
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      _title,
-      style: TextStyle(fontSize: 25, color: Colors.blue[500]),
-    );
-  }
-}
-
-class _NoteText extends StatelessWidget {
-  final String _text;
-
-  _NoteText(this._text);
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      _text,
-      style: TextStyle(fontSize: 18, color: Colors.black),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-}

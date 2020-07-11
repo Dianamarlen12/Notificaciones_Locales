@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/painting.dart';
-import 'notification.dart';
+import 'list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -34,26 +34,28 @@ class MenuLateral extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Drawer(
       child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              child: Text("OPERACIONES",
-                  style: TextStyle(
-                      fontFamily: 'Carter', fontSize: 30, color: Colors.white)),
-              decoration: BoxDecoration(color: Colors.black),
-            ),
-            ListTile(
-              title: Text("RECORDATORIOS",
-                style: TextStyle(fontWeight: FontWeight.bold,
-                    fontSize: 20.0,
-                    color: Colors.black),),
-              onTap: () {
-                Navigator.push(context,
-                    new MaterialPageRoute(builder: (context) => new NoteList()
-                    ));
-              },),
-          ]),);
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            child: Text("OPERACIONES",
+                style: TextStyle(
+                    fontFamily: 'Carter', fontSize: 30, color: Colors.white)),
+            decoration: BoxDecoration(color: Colors.black),
+          ),
+          ListTile(
+            title: Text("RECORDATORIOS",
+              style: TextStyle(fontWeight: FontWeight.bold,
+                  fontSize: 20.0,
+                  color: Colors.black),),
+            onTap: () {
+              Navigator.push(context,
+                  new MaterialPageRoute(builder: (context) => new NoteList()
+                  ));
+            },),
+      ]),
+    );
   }
+
 }
 
 class Login extends StatefulWidget {
@@ -375,8 +377,7 @@ class _LoginState extends State<Login> {
     }));
   }
 
-
-  Future<void> guardarPreferencias() async {
+Future<void> guardarPreferencias() async {
     SharedPreferences datos = await SharedPreferences.getInstance();
     datos.setString('nombre', _controllerUsuario.text);
     datos.setString('correo', _controllerCorreo.text);
@@ -400,3 +401,4 @@ class _LoginState extends State<Login> {
     Navigator.pop(context);
   }
 }
+

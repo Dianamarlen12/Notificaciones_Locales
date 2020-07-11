@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'note_provider.dart';
-import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:notificacioness/note_provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter/cupertino.dart';
+import 'DataTime.dart';
 
 enum NoteMode {
   Editing,
@@ -25,10 +26,8 @@ class Note extends StatefulWidget {
 
 class NoteState extends State<Note> {
 
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _textController = TextEditingController();
-
-  //VARIABLES
+  final TextEditingController controllertitulo = TextEditingController();
+  final TextEditingController controllerdescripcion = TextEditingController();
   int Num;
   int Hours;
   int Minutes;
@@ -40,16 +39,15 @@ class NoteState extends State<Note> {
   String _toTwoDigitString(int value) {
     return value.toString().padLeft(2, '0');
   }
+  //List<Map<String, String>> get notes => NoteInheritedWidget.of(context).notes;
 
-  //Declarar el plugin
+  //Declarar los plugin
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
   var initializationSettingsAndroid;
   var initializationSettingsIOS;
   var initializationSettings;
 
-//Ejemplo del profe
   Future scheuleAtParticularTime(DateTime timee) async {
-    //var time = Time(timee.hour, timee.minute, timee.second);
     var time = Time(timee.hour, timee.minute, timee.second);
     print(time.toString());
 
@@ -64,15 +62,14 @@ class NoteState extends State<Note> {
     var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, IOSPlatformChannelSpecifics);
     var now = new DateTime.now();
-    //Notificar a los 3 minutos
-    // var reprogram = now.add(Duration(hours: 00, minutes: 00, seconds: 5));
-    //Id aleatorio(tarea)
+
     await flutterLocalNotificationsPlugin.showDailyAtTime(
         0,
         widget.note['title'],
         widget.note['text'],
         time,
         platformChannelSpecifics, payload: 'Hola');
+
     //Ver la hora programada
     Fluttertoast.showToast(
       msg: "Scheduled at time ${time.hour} : ${time.minute} : ${time.second} ",
@@ -127,13 +124,11 @@ class NoteState extends State<Note> {
     print('Called On did Receive local Notification');
   }
 
-  //List<Map<String, String>> get _notes => NoteInheritedWidget.of(context).notes;
-
   @override
   void didChangeDependencies() {
     if (widget.noteMode == NoteMode.Editing) {
-      _titleController.text = widget.note['title'];
-      _textController.text = widget.note['text'];
+      controllertitulo.text = widget.note['title'];
+      controllerdescripcion.text = widget.note['text'];
     }
     super.didChangeDependencies();
   }
@@ -151,49 +146,46 @@ class NoteState extends State<Note> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(
-                  hintText: 'Titulo de la nota'
-              ),
+            new SizedBox(height: 10.0),
+            TextFormField(
+              controller: controllertitulo,
+              decoration: InputDecoration(labelText: "Titulo de la nota"),
             ),
-            Container(height: 8,),
-            TextField(
-              controller: _textController,
-              decoration: InputDecoration(
-                  hintText: 'Descripcion de la nota'
-              ),
+            new SizedBox(height: 10.0),
+            TextFormField(
+              controller: controllerdescripcion,
+              decoration: InputDecoration(labelText: "Descripcion de la nota"),
             ),
             Container(height: 16.0,),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _NoteButton('Guardar', Colors.grey, () {
-                  final title = _titleController.text;
-                  final text = _textController.text;
+                _NoteButton('Guardar', Colors.green, () {
+                  final title = controllertitulo.text;
+                  final text = controllerdescripcion.text;
 
                   if (widget?.noteMode == NoteMode.Adding) {
                     NoteProvider.insertNote({
                       'title': title,
-                      'text': text
+                      'text': text,
                     });
                   } else if (widget?.noteMode == NoteMode.Editing) {
                     NoteProvider.updateNote({
                       'id': widget.note['id'],
-                      'title': _titleController.text,
-                      'text': _textController.text,
+                      'title': controllertitulo.text,
+                      'text': controllerdescripcion.text,
                     });
                   }
                   Navigator.pop(context);
                 }),
                 Container(height: 16.0,),
-                _NoteButton('Cancelar', Colors.grey, () {
+                _NoteButton('Cancelar', Colors.green, () {
                   Navigator.pop(context);
                 }),
                 widget.noteMode == NoteMode.Editing ?
                 Padding(
                   padding: const EdgeInsets.only(left: 8.0),
-                  child: _NoteButton('Eliminar', Colors.grey, () async {
+                  child: _NoteButton('Eliminar', Colors.green, () async {
                     await NoteProvider.deleteNote(widget.note['id']);
                     Navigator.pop(context);
                   }),
@@ -208,9 +200,9 @@ class NoteState extends State<Note> {
                 Icon(
                   Icons.notifications_active,
                   color: Colors.red,
-                  size: 28.0,
+                  size: 32.0,
                 ),
-                Text('Schedule notification', style: TextStyle(color: Colors.grey),)
+                Text('Schedule notification', style: TextStyle(color: Colors.grey, fontSize: 25),)
               ],
             ),
             Text(""),
@@ -222,6 +214,8 @@ class NoteState extends State<Note> {
                   onPressed: () {
                     DatePicker.showDateTimePicker(context, showTitleActions: true, onChanged: (date) {
                       print('change $date in time zone ' + date.timeZoneOffset.inHours.toString());
+                      print('change $date in time zone ' + date.timeZoneOffset.inMinutes.toString());
+                      print('change $date in time zone ' + date.timeZoneOffset.inSeconds.toString());
                     }, onConfirm: (date) {
                       setState(() {
                         Hours = date.hour;
@@ -232,7 +226,6 @@ class NoteState extends State<Note> {
                         Day = date.day;
                       });
                       print('confirm $date');
-                      //MOTODO PARA LA NOTIFICACIÓN
                       scheuleAtParticularTime(
                           DateTime.fromMillisecondsSinceEpoch(
                               date.millisecondsSinceEpoch)
@@ -241,103 +234,16 @@ class NoteState extends State<Note> {
                   child: Text('Click aquí!',
                     style: TextStyle(color: Colors.white),
                   ),
-                  height: 40,
-                  minWidth: 80,
+                  height: 50,
+                  minWidth: 100,
                   color: Colors.grey,
                 ),
               ],
             ),
           ],
         ),
-      ),
+      )
     );
-  }
-}
-
-class _NoteButton extends StatelessWidget {
-
-  final String _text;
-  final Color _color;
-  final Function _onPressed;
-
-  _NoteButton(this._text, this._color, this._onPressed);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialButton(
-      onPressed: _onPressed,
-      child: Text(
-        _text,
-        style: TextStyle(color: Colors.white),
-      ),
-      height: 40,
-      minWidth: 100,
-      color: _color,
-    );
-  }
-}
-
-class CustomPicker extends CommonPickerModel {
-  String digits(int value, int length) {
-    return '$value'.padLeft(length, "0");
-  }
-
-  CustomPicker({DateTime currentTime, LocaleType locale}) : super(locale: locale) {
-    this.currentTime = currentTime ?? DateTime.now();
-    this.setLeftIndex(this.currentTime.hour);
-    this.setMiddleIndex(this.currentTime.minute);
-    this.setRightIndex(this.currentTime.second);
-  }
-
-  @override
-  String leftStringAtIndex(int index) {
-    if (index >= 0 && index < 24) {
-      return this.digits(index, 2);
-    } else {
-      return null;
-    }
-  }
-
-  @override
-  String middleStringAtIndex(int index) {
-    if (index >= 0 && index < 60) {
-      return this.digits(index, 2);
-    } else {
-      return null;
-    }
-  }
-
-  @override
-  String rightStringAtIndex(int index) {
-    if (index >= 0 && index < 60) {
-      return this.digits(index, 2);
-    } else {
-      return null;
-    }
-  }
-
-  @override
-  String leftDivider() {
-    return "|";
-  }
-
-  @override
-  String rightDivider() {
-    return "|";
-  }
-
-  @override
-  List<int> layoutProportions() {
-    return [1, 2, 1];
-  }
-
-  @override
-  DateTime finalTime() {
-    return currentTime.isUtc
-        ? DateTime.utc(currentTime.year, currentTime.month, currentTime.day,
-        this.currentLeftIndex(), this.currentMiddleIndex(), this.currentRightIndex())
-        : DateTime(currentTime.year, currentTime.month, currentTime.day, this.currentLeftIndex(),
-        this.currentMiddleIndex(), this.currentRightIndex());
   }
 }
 
@@ -362,5 +268,28 @@ class SecondPage extends StatelessWidget {
 
             ]
         ));
+  }
+}
+
+class _NoteButton extends StatelessWidget {
+
+  final String _text;
+  final Color _color;
+  final Function _onPressed;
+
+  _NoteButton(this._text, this._color, this._onPressed);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialButton(
+      onPressed: _onPressed,
+      child: Text(
+        _text,
+        style: TextStyle(color: Colors.white),
+      ),
+      height: 40,
+      minWidth: 100,
+      color: _color,
+    );
   }
 }
